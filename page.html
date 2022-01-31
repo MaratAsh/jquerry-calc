@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Calculator</title>
+	<link rel="stylesheet" type="text/css" href="styles.css"/>
+</head>
+<body>
+	<div class="root">
+		<div class="window">
+			<div class="calc">
+			
+			<div class="calc-display">
+				<div class="calc-expression calc-not-active">
+					Enter expression...
+				</div>
+				<!--
+				 	<span class="calc-expression-operand">5</span>
+					<span class="calc-expression-operator">+</span>
+					<span class="calc-expression-operand">5</span>
+				 -->
+				<span class="calc-expression calc-not-active" style="height: 50px">
+					Enter expression...
+				</span>
+				<span id="calc-ex" class="calc-ex">
+					=
+					<span class="calc-expression-result">0</span>
+				</span>
+			</div>
+			
+			<div class="calc-panel">
+				<div class="calc-panel-additional">
+					<button id="button-sqrt" class="button-double">√x</button>
+					<button id="button-power" class="button-double"><span>x</span><sup>y</sup></button>
+					<button id="button-subexp-start" class="button-double">(</button>
+					<button id="button-subexp-end" class="button-double">)</button>
+				</div>
+				<div class="calc-panel-main">
+					<button id="button-clear" class="button-double">C</button><button id="button-del" class="button-one">Del</button><button id="button-div" class="button-one button-operation">÷</button>
+					<button id="button-seven" class="button-one">7</button><button id="button-eight" class="button-one">8</button><button id="button-nine"  class="button-one">9</button><button id="button-mul" class="button-one button-operation">×</button>
+					<button id="button-four"  class="button-one">4</button><button id="button-five"  class="button-one">5</button><button id="button-six"   class="button-one">6</button><button id="button-sub" class="button-one button-operation">-</button>
+					<button id="button-one"   class="button-one">1</button><button id="button-two"   class="button-one">2</button><button id="button-three" class="button-one">3</button><button id="button-add" class="button-one button-operation">+</button>
+					<button id="button-zero"  class="button-double">0</button><button id="button-point"   class="button-one">.</button><button id="button-eq" class="button-one button-operation">=</button>
+				</div>
+			</div>
+			
+			</div>
+			
+			<div class="panel-history">
+				<!-- 
+				<div class="history-element">
+					<span class="history-expression" onclick="expression_clicked(this);">5 + 5</span>
+					<span class="history-answer">10</span>
+				</div>
+				-->
+			</div>
+		</div>
+	</div>
+	<!--
+	<script src="jquery-3.6.0.min.js"></script>
+	-->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="custom.js"></script>
+</body>
+</html>
