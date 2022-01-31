@@ -1,6 +1,6 @@
-const calc_exp = $(".calc-expression")[0];
-const calc__exp = $(".calc-expression")[1];
-const calc__res = calc__exp.parentElement.lastElementChild;
+const calc__exp = $(".calc-expression")[0];
+const calc_board_res = $("#calc-ex")[0];
+const calc__res = $(".calc-expression-result")[0];
 
 const OPERATION_ADD = 1;
 const OPERATION_SUB = 2;
@@ -137,6 +137,7 @@ function preprocess_command()
 	{
 		calc__exp.innerText = "";
 	}
+	calc_board_res.style.visibility = "hidden";
 }
 
 function process_eq()
@@ -240,16 +241,6 @@ function process_del()
 
 function process_clear()
 {
-	if (calc_exp.classList.contains("calc-not-active"))
-	{
-		
-	}
-	else
-	{
-		calc_exp.classList.add("calc-not-active");
-		calc_exp.innerHTML = "Enter expression...";
-		calc__res.style.visibility = "hidden";
-	}
 	if (calc__exp.classList.contains("calc-not-active"))
 	{
 
@@ -258,7 +249,7 @@ function process_clear()
 	{
 		calc__exp.classList.add("calc-not-active");
 		calc__exp.innerHTML = "Enter expression...";
-		calc__res.style.visibility = "hidden";
+		calc_board_res.style.visibility = "hidden";
 	}
 }
 
@@ -513,8 +504,4 @@ $(document).ready(function () {
 	$("#button-subexp-end").click(process_subexp_end);
 	$(document).keyup(process_keyup);
 	process_clear();
-
-	process_number(10);
-	process_add();
-	process_number(10);
 });
