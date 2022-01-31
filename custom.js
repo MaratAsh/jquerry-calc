@@ -349,12 +349,28 @@ function process_sqrt()
 	process_sqrt_elem(calc__exp);
 }
 
-function process_power() {
+function process_power()
+{
 	preprocess_command();
 
+	return alert("Not working yet!");
 	process_sqrt_elem(calc__exp);
 }
 
+
+function process_subexp_start()
+{
+	preprocess_command();
+
+	return alert("Not working yet!");
+}
+
+function process_subexp_end()
+{
+	preprocess_command();
+
+	return alert("Not working yet!");
+}
 function is_last_operation(string)
 {
 	let index = string.length - 1;
@@ -493,8 +509,8 @@ $(document).ready(function () {
 	$("#button-point").click(process_point);
 	$("#button-sqrt").click(process_sqrt);
 	$("#button-power").click(process_power);
-	//$("button-subexp-start").click(process_subexp_start);
-	//$("button-subexp-end").click(process_subexp_end);
+	$("#button-subexp-start").click(process_subexp_start);
+	$("#button-subexp-end").click(process_subexp_end);
 	$(document).keyup(process_keyup);
 	process_clear();
 
