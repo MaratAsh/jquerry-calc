@@ -61,13 +61,17 @@ function get_element_type(elem)
 	{
 		return (ElementType.Operation);
 	}
-	else if (elem.classList.contains("calc-expression-operation"))
+	else if (elem.classList.contains("calc-expression-operation-start"))
 	{
-		return (ElementType.Operation);
+		return (ElementType.OperationStart);
 	}
-	else if (elem.classList.contains("calc-expression-operation"))
+	else if (elem.classList.contains("calc-expression-operation-body"))
 	{
-		return (ElementType.Operation);
+		return (ElementType.OperationBody);
+	}
+	else if (elem.classList.contains("calc-expression-operation-end"))
+	{
+		return (ElementType.OperationEnd);
 	}
 	return (ElementType.Unknown);
 }
@@ -94,12 +98,18 @@ function get_format_expression(elem)
 		else
 			console.log("Unknown value of operation: " + e.value);
 	}
+	else if (elem.tagName == "SUP")
+	{
+		if (elem.innerText.length === 0)
+			return ("1");
+		else
+			return (elem.innerText);
+	}
 
 	for (let i = 0; i < elem.childNodes.length; ++i)
 	{
 		let e = elem.childNodes[i];
 
-		//console.dir(e);
 		elem_type = get_element_type(e);
 		if (elem_type === ElementType.Operand ||
 			elem_type === ElementType.Operator)
@@ -112,7 +122,8 @@ function get_format_expression(elem)
 			}
 			else if (e.value == Operation.Power)
 			{
-				string_expression += "(" + get_format_expression(e.childNodes[1]) + ")**(8)";
+				string_expression += "(" + get_format_expression(e.childNodes[1]) + ")**(" +
+					get_format_expression(e.childNodes[2].childNodes[0]) + ")";
 			}
 			else
 				console.log("Unknown value of operation: " + e.value);
@@ -124,6 +135,7 @@ function get_format_expression(elem)
 
 function preprocess_command()
 {
+	calc__exp.attributes["changed"] = "changed";
 	if (calc__exp.lastElementChild)
 	{
 		let i = calc__exp.lastElementChild.innerHTML.length - 1;
@@ -140,6 +152,21 @@ function preprocess_command()
 	calc_board_res.style.visibility = "hidden";
 }
 
+function save_expression(elem, expression, result) {
+	let h = $(".panel-history").get(0);
+	let elementHTML = '<div class="history-element">'
+		+ '<span class="history-expression" onclick="expression_clicked(this);">' + elem.innerHTML + '</span>'
+		+ '<span class="history-answer">' + result + '</span>'
+	+ '</div>';
+	let newElem = $(elementHTML)[0];
+	console.dir(newElem);
+	if (h.children.length > 0)
+		h.insertBefore(newElem, h.firstChild);
+	else
+		h.appendChild(newElem);
+	delete calc__exp.attributes["changed"];
+}
+
 function process_eq()
 {
 	let expression = get_format_expression(calc__exp);
@@ -148,19 +175,9 @@ function process_eq()
 	{
 		let result = "" + custom_eval(expression);
 		calc__res.innerHTML = result;
-		let h = $(".panel-history").get(0);
-		let elem = $('<div class="history-element">\
-				<span class="history-expression" onclick="expression_clicked(this);">' + calc__exp.innerHTML + '</span>\
-				<span class="history-answer">' + result + '</span>\
-			</div>');
-		if (h.children.length > 0)
-			h.insertBefore(elem.get(0), h.firstChild)
-		else
-			h.innerHTML = '<div class="history-element">\
-				<span class="history-expression" onclick="expression_clicked(this);">' + calc__exp.innerHTML + '</span>\
-				<span class="history-answer">' + result + '</span>\
-			</div>';
-		calc__res.style.visibility = "visible";
+		if (calc__exp.attributes["changed"])
+			save_expression(calc__exp, expression, result);
+		calc_board_res.style.visibility = "visible";
 	}
 	else
 	{
@@ -190,14 +207,16 @@ function process_div()
 
 function process_point()
 {
+	let elem_type = get_element_type(calc__exp.lastElementChild);
+
 	if (calc__exp.lastElementChild)
 	{
-		if (get_element_type(calc__exp.lastElementChild.classList) === ElementType.Operand)
+		if (elem_type === ElementType.Operand)
 		{
 			if (calc__exp.lastElementChild.innerText.indexOf(".") == -1)
 				calc__exp.lastElementChild.innerText += ".";
 		}
-		else if (get_element_type(calc__exp.lastElementChild.classList) === ElementType.Operator)
+		else if (elem_type === ElementType.Operator)
 		{
 			process_number(0);
 			calc__exp.lastElementChild.innerText += ".";
@@ -207,17 +226,21 @@ function process_point()
 
 function process_del_in(elem)
 {
-	if (get_element_type(elem) === ElementType.Operand)
+	let elem_type = get_element_type(elem);
+
+	if (elem_type === ElementType.Operand)
 	{
 		if (elem.innerText.length > 1)
 			elem.innerText = elem.innerText.substr(0, elem.innerText.length - 1);
 		else
 			elem.remove();
 	}
-	else if (elem.classList.contains(""))
+	else if (elem_type === ElementType.Operation)
 	{
-
+		process_del_in(elem.childNodes[1]);
 	}
+	else
+		console.dir(elem);
 }
 
 function process_del()
@@ -296,18 +319,19 @@ function create_operation_elem(operation_type)
 function process_sqrt_elem(elem)
 {
 	let newElem = create_operation_elem(Operation.Sqrt);
+	let elem_type = get_element_type(elem.lastElementChild);
 
-	if (get_element_type(elem.lastElementChild) === ElementType.Operation)
+	if (elem_type === ElementType.Operation)
 	{
 		process_sqrt_elem(elem.childNodes[1]);
 	}
-	else if (get_element_type(elem.lastElementChild) === ElementType.Operand)
+	else if (elem_type === ElementType.Operand)
 	{
 		newElem.childNodes[1].lastElementChild.innerText = elem.lastElementChild.innerText;
 		elem.lastElementChild.remove();
 		elem.appendChild(newElem);
 	}
-	else if (get_element_type(elem.lastElementChild) === ElementType.Operator)
+	else if (elem_type === ElementType.Operator)
 	{
 		alert('Enter operand first!');
 	}
@@ -316,18 +340,19 @@ function process_sqrt_elem(elem)
 function process_power_elem(elem)
 {
 	let newElem = create_operation_elem(Operation.Power);
+	let elem_type = get_element_type(elem.lastElementChild);
 
-	if (get_element_type(elem.lastElementChild) === ElementType.Operation)
+	if (elem_type === ElementType.Operation)
 	{
 		process_power_elem(elem.childNodes[1]);
 	}
-	else if (get_element_type(elem.lastElementChild.classList) === ElementType.Operand)
+	else if (elem_type === ElementType.Operand)
 	{
 		newElem.childNodes[1].lastElementChild.innerText = elem.lastElementChild.innerText;
 		elem.lastElementChild.remove();
 		elem.appendChild(newElem);
 	}
-	else if (get_element_type(elem.lastElementChild.classList) === ElementType.Operator)
+	else if (elem_type === ElementType.Operator)
 	{
 		alert('Enter operand first!');
 	}
@@ -344,8 +369,7 @@ function process_power()
 {
 	preprocess_command();
 
-	return alert("Not working yet!");
-	process_sqrt_elem(calc__exp);
+	process_power_elem(calc__exp);
 }
 
 
@@ -417,18 +441,26 @@ function process_number_to(elem, number)
 {
 	if (elem.lastElementChild)
 	{
-		if (elem.lastElementChild.classList.contains('calc-expression-operator'))
+		let elem_type = get_element_type(elem.lastElementChild);
+
+		if (elem_type == ElementType.Operator)
 		{
 			let newElem = create_operand_elem(number);
 			elem.appendChild(newElem);
 		}
-		else if (elem.lastElementChild.classList.contains('calc-expression-operand'))
+		else if (elem_type == ElementType.Operand)
 		{
 			elem.lastElementChild.innerText += number;
 		}
-		else if (elem.lastElementChild.classList.contains('calc-expression-operation'))
+		else if (elem_type == ElementType.Operation)
 		{
-			process_number_to(elem.lastElementChild, number);
+
+			console.log("Number: " + number);
+			console.dir(elem);
+			if (elem.lastElementChild.childNodes[1].classList.contains("sqrt"))
+				process_number_to(elem.childNodes[1].lastElementChild, number);
+			else if (elem.lastElementChild.childNodes[1].classList.contains("power"))
+				elem.lastElementChild.lastElementChild.lastElementChild.innerHTML += number;
 		}
 	}
 	else
@@ -457,8 +489,6 @@ function expression_clicked(elem)
 
 function process_keyup(e)
 {
-	// console.dir(e);
-	// alert("Key \"" + e.originalEvent.key + "\"");
 	if (e.originalEvent.key == "Enter" || e.originalEvent.key == "=")
 		process_eq();
 	else if (e.originalEvent.key == "Backspace")
@@ -504,4 +534,27 @@ $(document).ready(function () {
 	$("#button-subexp-end").click(process_subexp_end);
 	$(document).keyup(process_keyup);
 	process_clear();
+	if (window.location.hash.length > 0)
+	{
+		let i = 1;
+		for (; i < window.location.hash.length; ++i)
+		{
+			let symbol = window.location.hash[i];
+			if (symbol == "+")
+				add_operator_to(calc__exp, OPERATION_ADD);
+			else if (symbol == "-")
+				add_operator_to(calc__exp, OPERATION_SUB);
+			else if (symbol == "*")
+				add_operator_to(calc__exp, OPERATION_MUL);
+			else if (symbol == "/")
+				add_operator_to(calc__exp, OPERATION_DIV);
+			else if (symbol == ".")
+				process_point();
+			else if (symbol == "^")
+				process_power();
+			else if (symbol in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+				process_number(symbol);
+		}
+		process_eq();
+	}
 });

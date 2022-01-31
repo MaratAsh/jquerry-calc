@@ -96,7 +96,9 @@ body {
 
 .calc-expression-operand
 {
-	
+	background: rgba(88, 88, 88, 0.75);
+	padding: 0.1vw 0.5vw;
+	border-radius: 1vw;
 }
 
 .calc-expression-result {
